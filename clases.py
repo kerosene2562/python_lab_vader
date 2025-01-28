@@ -204,24 +204,31 @@ class Statistic:
             reader = csv.reader(csvfile)
             for line in reader:
                 if line:
-                    thescore = float(line[4].replace(',', '.'))
-                    self.scores.append(thescore)
+                    self.process_score(line)
+                    self.process_time_score(line)
+                    self.process_answers(line)
 
-                    timer = int(line[3].split(' ')[0])
-                    self.time_score.append((timer, thescore))
+    def process_score(self, line):
+        thescore = float(line[4].replace(',', '.'))
+        self.scores.append(thescore)
 
-                    for i in range(5, 25):
-                        score_str = line[i].replace(',', '.')
-                        if score_str in ('-', ''):
-                            continue
-                        try:
-                            score = float(score_str)
-                        except ValueError:
-                            continue
-                        if score == 0.5:
-                            self.correct_answers[i - 5] += 1
-                        else:
-                            self.incorrect_answers[i - 5] += 1
+    def process_time_score(self, line):
+        timer = int(line[3].split(' ')[0])
+        self.time_score.append((timer, float(line[4].replace(',', '.'))))
+
+    def process_answers(self, line):
+        for i in range(5, 25):
+            score_str = line[i].replace(',', '.')
+            if score_str in ('-', ''):
+                continue
+            try:
+                score = float(score_str)
+            except ValueError:
+                continue
+            if score == 0.5:
+                self.correct_answers[i - 5] += 1
+            else:
+                self.incorrect_answers[i - 5] += 1
 
     def get_avg_correct(self):
         total_answers = [self.correct_answers[i] + self.incorrect_answers[i] for i in range(20)]
@@ -296,35 +303,58 @@ class KmrWork(CsvKmr, Statistic, Plots):
         KmrWork.set_num(num)
 
     @staticmethod
-    def compare_csv(kmr1, kmr2, output_file='compare_result.txt'):
-        stats1 = Statistic(KmrWork.kmrs[kmr1].file_path)
-        stats2 = Statistic(KmrWork.kmrs[kmr2].file_path)
+    def _compare_csv(kmr1, kmr2, output_file='compare_result.txt'):
+        stats1 = KmrWork.kmrs[kmr1].get_statistics()
+        stats2 = KmrWork.kmrs[kmr2].get_statistics()
 
-        stats1.analyze()
-        stats2.analyze()
+        result_data = {
+            "kmr1": kmr1,
+            "kmr2": kmr2,
+            "avg1": stats1['average'],
+            "avg2": stats2['average']
+        }
 
-        avg1 = sum(stats1.scores) / len(stats1.scores)
-        avg2 = sum(stats2.scores) / len(stats2.scores)
-
-        result = (
-            f"Порівняння КМР {kmr1} та {kmr2}:\n"
-            f"Середній бал КМР {kmr1}: {avg1:.2f}\n"
-            f"Середній бал КМР {kmr2}: {avg2:.2f}\n")
-        with open(output_file, 'w', encoding='utf-8') as f:
-            f.write(result)
+        result = KmrWork._format_csv_comparison_result(result_data)
+        KmrWork._save_to_file(result, output_file)
 
     @staticmethod
-    def compare_avg_plots(kmr1, kmr2):
-        KmrWork.kmrs[kmr1].analyze()
-        KmrWork.kmrs[kmr2].analyze()
+    def _format_csv_comparison_result(data):
+        return (
+            f"Порівняння КМР {data['kmr1']} та {data['kmr2']}:\n"
+            f"Середній бал КМР {data['kmr1']}: {data['avg1']:.2f}\n"
+            f"Середній бал КМР {data['kmr2']}: {data['avg2']:.2f}\n"
+        )
 
-        avg_stat1 = KmrWork.kmrs[kmr1].get_avg_correct()
-        avg_stat2 = KmrWork.kmrs[kmr2].get_avg_correct()
+    @staticmethod
+    def _save_to_file(content, output_file):
+        with open(output_file, 'w', encoding='utf-8') as f:
+            f.write(content)
 
+    def get_statistics(self):
+        stats = Statistic(self.file_path)
+        stats.analyze()
+        return {
+            'average': sum(stats.scores) / len(stats.scores),
+            'scores': stats.scores
+        }
 
+    @staticmethod
+    def _compare_avg_plots(kmr1, kmr2):
+        avg_stats = {
+            "kmr1": KmrWork.kmrs[kmr1].get_avg_correct(),
+            "kmr2": KmrWork.kmrs[kmr2].get_avg_correct()
+        }
+
+        KmrWork._plot_average_comparison(avg_stats, kmr1, kmr2)
+
+    @staticmethod
+    def _plot_average_comparison(avg_stats, kmr1, kmr2):
         plt.figure()
-        plt.plot([f'Питання {i + 1}' for i in range(len(avg_stat1))], avg_stat1, label='КМР 1', color='blue')
-        plt.plot([f'Питання {i + 1}' for i in range(len(avg_stat2))], avg_stat2, label='КМР 2', color='red')
+
+        labels = [f'Питання {i + 1}' for i in range(len(avg_stats["kmr1"]))]
+        plt.plot(labels, avg_stats["kmr1"], label=f'КМР {kmr1}', color='blue')
+        plt.plot(labels, avg_stats["kmr2"], label=f'КМР {kmr2}', color='red')
+
         plt.title('Порівняння відсотків правильних відповідей')
         plt.xlabel('Питання')
         plt.ylabel('Відсоток правильних відповідей')
@@ -333,22 +363,35 @@ class KmrWork(CsvKmr, Statistic, Plots):
         plt.tight_layout()
 
         file_path = os.path.join(KmrWork.kmrs[kmr1].cat, 'compare_avg_plots.png')
+        KmrWork._save_plot(file_path)
+
+    @staticmethod
+    def _save_plot(file_path):
         plt.savefig(file_path)
         plt.close()
 
     @staticmethod
-    def compare_marks_plots(kmr1, kmr2):
-        marks_stat1 = KmrWork.kmrs[kmr1].marks_stat(KmrWork.kmrs[kmr1].students)
-        marks_stat2 = KmrWork.kmrs[kmr2].marks_stat(KmrWork.kmrs[kmr2].students)
+    def _compare_marks_plots(kmr1, kmr2):
+        marks1, counts1 = KmrWork.kmrs[kmr1].get_marks_distribution()
+        marks2, counts2 = KmrWork.kmrs[kmr2].get_marks_distribution()
 
-        marks1 = list(marks_stat1.keys())
-        counts1 = list(marks_stat1.values())
-        marks2 = list(marks_stat2.keys())
-        counts2 = list(marks_stat2.values())
+        marks_data = {
+            "kmr1": (marks1, counts1),
+            "kmr2": (marks2, counts2)
+        }
 
+        KmrWork._plot_marks_comparison(marks_data, kmr1, kmr2)
+
+    @staticmethod
+    def _plot_marks_comparison(marks_data, kmr1, kmr2):
         plt.figure()
+
+        marks1, counts1 = marks_data["kmr1"]
+        marks2, counts2 = marks_data["kmr2"]
+
         plt.bar(marks1, counts1, width=0.4, label=f'КМР {kmr1}', align='center', color='blue')
         plt.bar(marks2, counts2, width=0.4, label=f'КМР {kmr2}', align='edge', color='red')
+
         plt.title('Порівняння розподілу оцінок серед студентів')
         plt.xlabel('Оцінка')
         plt.ylabel('Кількість студентів')
@@ -356,29 +399,8 @@ class KmrWork(CsvKmr, Statistic, Plots):
         plt.tight_layout()
 
         file_path = os.path.join(KmrWork.kmrs[kmr1].cat, 'compare_marks_plots.png')
-        plt.savefig(file_path)
-        plt.close()
+        KmrWork._save_plot(file_path)
 
-    @staticmethod
-    def compare_best_marks_plots(kmr1, kmr2, bottom_margin, top_margin):
-        best_results1 = KmrWork.kmrs[kmr1].best_marks_per_time(KmrWork.kmrs[kmr1].students, bottom_margin, top_margin)
-        best_results2 = KmrWork.kmrs[kmr2].best_marks_per_time(KmrWork.kmrs[kmr2].students, bottom_margin, top_margin)
-
-        students1 = [result[0] for result in best_results1]
-        avg_per_min1 = [result[2] for result in best_results1]
-        students2 = [result[0] for result in best_results2]
-        avg_per_min2 = [result[2] for result in best_results2]
-
-        plt.figure()
-        plt.bar(students1, avg_per_min1, width=0.4, label=f'КМР {kmr1}', align='center', color='blue')
-        plt.bar(students2, avg_per_min2, width=0.4, label=f'КМР {kmr2}', align='edge', color='red')
-        plt.title('Порівняння найкращих студентів за співвідношенням балів до часу')
-        plt.xlabel('Студент')
-        plt.ylabel('Середній бал за хвилину')
-        plt.legend()
-        plt.xticks(rotation=45)
-        plt.tight_layout()
-
-        file_path = os.path.join(KmrWork.kmrs[kmr1].cat, 'compare_best_marks_plots.png')
-        plt.savefig(file_path)
-        plt.close()
+    def get_marks_distribution(self):
+        marks_stat = self.marks_stat(self.students)
+        return list(marks_stat.keys()), list(marks_stat.values())

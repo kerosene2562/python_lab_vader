@@ -40,8 +40,8 @@ def ex4():
     kmr2.avg_plot(kmr2.get_avg_correct())
     kmr2.marks_plot(kmr2.get_score_distribution())
 
-    KmrWork.compare_csv(1, 2)
-    KmrWork.compare_avg_plots(1, 2)
+    KmrWork._compare_csv(1, 2)
+    KmrWork._compare_avg_plots(1, 2)
 
     best_marks = kmr2.get_top_5_scores()
     kmr2.best_marks_plot(best_marks)
