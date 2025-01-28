@@ -141,11 +141,9 @@ class AppleTree:
             apple.grow()
 
     def all_are_ripe(self):
-        """Перевіряє, чи всі яблука стиглі."""
         return all(apple.is_ripe() for apple in self.apples)
 
     def give_away_all(self):
-        """Очищає список яблук після збору"""
         self.apples = []
 
     def __str__(self):
