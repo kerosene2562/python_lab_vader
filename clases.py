@@ -191,9 +191,10 @@ class CsvKmr:
 
 class Statistic:
     def __init__(self, file_path):
+        number_of_answers = 20
         self.file_path = file_path
-        self.correct_answers = [0] * 20
-        self.incorrect_answers = [0] * 20
+        self.correct_answers = [0] * number_of_answers
+        self.incorrect_answers = [0] * number_of_answers
         self.scores = []
         self.time_score = []
 
@@ -207,15 +208,21 @@ class Statistic:
                     self.process_answers(line)
 
     def process_score(self, line):
-        score_of_the_person = float(line[4].replace(',', '.'))
+        total_score_row = 4
+        score_of_the_person = float(line[total_score_row].replace(',', '.'))
         self.scores.append(score_of_the_person)
 
     def process_time_score(self, line):
-        test_time = int(line[3].split(' ')[0])
-        self.time_score.append((test_time, float(line[4].replace(',', '.'))))
+        total_score_row = 4
+        total_spented_time_row = 3
+        test_time = int(line[total_spented_time_row].split(' ')[0])
+        self.time_score.append((test_time, float(line[total_score_row].replace(',', '.'))))
 
     def process_answers(self, line):
-        for i in range(5, 25):
+        first_question_row = 5
+        last_question_row = 25
+        scored_point = 0.5
+        for i in range(first_question_row, last_question_row):
             score_str = line[i].replace(',', '.')
             if score_str in ('-', ''):
                 continue
@@ -223,10 +230,10 @@ class Statistic:
                 score = float(score_str)
             except ValueError:
                 continue
-            if score == 0.5:
-                self.correct_answers[i - 5] += 1
+            if score == scored_point:
+                self.correct_answers[i - first_question_row] += 1
             else:
-                self.incorrect_answers[i - 5] += 1
+                self.incorrect_answers[i - first_question_row] += 1
 
     def get_avg_correct(self):
         total_answers = [self.correct_answers[i] + self.incorrect_answers[i] for i in range(20)]
@@ -239,7 +246,8 @@ class Statistic:
 
     def get_top_5_scores(self):
         self.time_score.sort(key=lambda x: (x[1] / x[0]), reverse=True)
-        return self.time_score[:5]
+        first_question_row = 5
+        return self.time_score[:first_question_row]
 
 
 class Plots:
@@ -260,7 +268,7 @@ class Plots:
         plt.xticks(ticks=range(1, len(percentages) + 1,1), labels=range(1, len(percentages) + 1,1))
 
         if Plots.cat is None:
-            Plots.cat = 'D:/Python/pr9/pr9/plots'
+            Plots.cat = 'plots'
 
         file_path = os.path.join(Plots.cat, 'avg_plot.png')
         plt.savefig(file_path)
