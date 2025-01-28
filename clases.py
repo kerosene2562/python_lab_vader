@@ -4,20 +4,20 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 
-#ex 1
+
 class Alphabet:
     lang = 'Ua'
-    letters = ['А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
+    ukrainian_alphabet_letters = ['А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
                'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ь', 'Ю', 'Я']
 
-    def __init__(self, lang=lang, letters=letters):
+    def __init__(self, lang=lang, letters=ukrainian_alphabet_letters):
         self.lang = lang
         self.letters = letters
 
     def print_alphabet(self):
         print(f"Алфавіт ({self.lang}): {' '.join(self.letters)}")
 
-    def letters_num(self):
+    def alphabet_lenth(self):
         return len(self.letters)
 
     def is_valid_text(self, text, allowed_letters):
@@ -40,7 +40,7 @@ class Alphabet:
 
 
 class EngAlphabet(Alphabet):
-    __en_letters_num = 26
+    __en_alphabet_lenth = 26
 
     def __init__(self):
         super().__init__('En', list('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
@@ -48,8 +48,8 @@ class EngAlphabet(Alphabet):
     def is_en_letter(self, text):
         return self.is_valid_text(text, self.letters)
 
-    def letters_num(self):
-        return self.__en_letters_num
+    def alphabet_lenth(self):
+        return self.__en_alphabet_lenth
 
     @staticmethod
     def example():
@@ -114,21 +114,21 @@ class SmallHouse(House):
 
 # ex 3
 class Apple:
-    states = {0: "Відсутнє", 1: "Цвітіння", 2: "Зелене", 3: "Червоне"}
+    states_of_growing = {0: "Відсутнє", 1: "Цвітіння", 2: "Зелене", 3: "Червоне"}
 
     def __init__(self, index):
         self._index = index
         self._state = 0
 
     def grow(self):
-        if self._state< len(Apple.states)-1:
+        if self._state< len(Apple.states_of_growing)-1:
             self._state += 1
 
     def is_ripe(self):
-        return self._state == max(Apple.states.keys())
+        return self._state == max(Apple.states_of_growing.keys())
 
     def __str__(self):
-        state_name = Apple.states[self._state]
+        state_name = Apple.states_of_growing[self._state]
         return f"Яблуко {self._index}: {state_name}"
 
 
@@ -207,12 +207,12 @@ class Statistic:
                     self.process_answers(line)
 
     def process_score(self, line):
-        thescore = float(line[4].replace(',', '.'))
-        self.scores.append(thescore)
+        score_of_the_person = float(line[4].replace(',', '.'))
+        self.scores.append(score_of_the_person)
 
     def process_time_score(self, line):
-        timer = int(line[3].split(' ')[0])
-        self.time_score.append((timer, float(line[4].replace(',', '.'))))
+        test_time = int(line[3].split(' ')[0])
+        self.time_score.append((test_time, float(line[4].replace(',', '.'))))
 
     def process_answers(self, line):
         for i in range(5, 25):
