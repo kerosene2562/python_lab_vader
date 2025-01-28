@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 class Alphabet:
     lang = 'Ua'
     letters = ['А', 'Б', 'В', 'Г', 'Ґ', 'Д', 'Е', 'Є', 'Ж', 'З', 'И', 'І', 'Ї', 'Й',
-        'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ь', 'Ю', 'Я']
+               'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш', 'Щ', 'Ь', 'Ю', 'Я']
 
     def __init__(self, lang=lang, letters=letters):
         self.lang = lang
@@ -20,24 +20,23 @@ class Alphabet:
     def letters_num(self):
         return len(self.letters)
 
-    def is_ua_letter(self, text):
-        ua_letters = self.letters
+    def is_valid_text(self, text, allowed_letters):
         punctuation = string.punctuation
-        k=0
+        found_valid_letter = False
         for char in text.upper().strip():
             if char.isalpha():
-                if char in ua_letters:
-                    k+=1
+                if char in allowed_letters:
+                    found_valid_letter = True
                 else:
                     return False
             elif char in punctuation or char.isspace() or char.isdigit():
                 continue
             else:
                 return False
-        if k>0:
-            return True
-        else:
-            return False
+        return found_valid_letter
+
+    def is_ua_letter(self, text):
+        return self.is_valid_text(text, self.letters)
 
 
 class EngAlphabet(Alphabet):
@@ -47,23 +46,7 @@ class EngAlphabet(Alphabet):
         super().__init__('En', list('ABCDEFGHIJKLMNOPQRSTUVWXYZ'))
 
     def is_en_letter(self, text):
-        en_letters = self.letters
-        punctuation = string.punctuation
-        k = 0
-        for char in text.upper().strip():
-            if char.isalpha():
-                if char in en_letters:
-                    k += 1
-                else:
-                    return False
-            elif char in punctuation or char.isspace() or char.isdigit():
-                continue
-            else:
-                return False
-        if k>0:
-            return True
-        else:
-            return False
+        return self.is_valid_text(text, self.letters)
 
     def letters_num(self):
         return self.__en_letters_num
