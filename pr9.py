@@ -1,6 +1,6 @@
 from clases import *
 
-
+#this function show how Apple class works
 def Appler():
     apple1 = Apple(1)
     apple2 = Apple(2)
@@ -28,7 +28,7 @@ def Appler():
     gardener.harvest()
     Gardener.apple_base(tree)
 
-
+#this function show how KmrCsv class works with mathplotlib library
 def ex4():
     KmrWork.cat = 'plots'
     kmr1 = KmrWork('marks.lab6.csv', 1)
@@ -47,7 +47,7 @@ def ex4():
     kmr2.best_marks_plot(best_marks)
     print("Аналіз завершено\n")
 
-
+#output menu to console
 while True:
     os.system('cls')
     print("\nМеню:")
@@ -58,6 +58,7 @@ while True:
     print("e. KmrWork")
     print("q. Вихід\n")
     choice = input("Введіть дію (a-e або q для виходу): ").lower()
+
 
     match choice:
         case 'a':
@@ -77,6 +78,7 @@ while True:
             en_alphabet = EngAlphabet()
             en_alphabet.print_alphabet()
             print(f"Кількість літер в англійському алфавіті: {en_alphabet.letters_num()}")
+            #choose letters to count
             letter_j = "J"
             letter_shch = "Щ"
             print(f"Чи належить буква '{letter_j}' англійському алфавіту? {en_alphabet.is_en_letter(letter_j)}")

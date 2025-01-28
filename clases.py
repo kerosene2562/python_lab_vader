@@ -55,7 +55,7 @@ class EngAlphabet(Alphabet):
     def example():
         return "Hello, mr John, how are u?\n"
 
-#ex 2
+#this class provides us to buy house for human
 class Human:
     default_name = "Вадим"
     default_age = 21
@@ -112,7 +112,7 @@ class SmallHouse(House):
     def __init__(self):
         super().__init__(area=40, price=5000)
 
-# ex 3
+#class provides apples growing and riping
 class Apple:
     states_of_growing = {0: "Відсутнє", 1: "Цвітіння", 2: "Зелене", 3: "Червоне"}
 
@@ -171,7 +171,7 @@ class Gardener:
         print("Довідка про яблука:")
         print(tree)
 
-#ex 4
+#chis class provides to open, read and work with csv files
 class CsvKmr:
     ref = None
     num = None
