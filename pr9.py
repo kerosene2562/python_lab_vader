@@ -1,6 +1,6 @@
 from clases import *
 
-#ex 3
+
 def Appler():
     apple1 = Apple(1)
     apple2 = Apple(2)
